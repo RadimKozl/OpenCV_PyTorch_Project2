@@ -1,63 +1,24 @@
-# # <font style="color:blue">Hooks for Trainer Class</font>
-#
-# This module implements several hooks (helper functions) for the Trainer class. 
-#
-# This module has the following method implemented:
-#
-# - `train_hook_default`
-#
-#
-# - `test_hook_default`
-#
-#
-# - `end_epoch_hook_classification`
-#
+#!/usr/bin/python3
 
-"""Implementation of several hooks that used in a Trainer class."""
+"""Module of Hooks for Trainer Class
+
+Implementation of several hooks that used in a Trainer class.
+This module implements several hooks (helper functions) for the Trainer class.
+This module has the following method implemented:
+    - train_hook_default()
+    - test_hook_default()
+    - end_epoch_hook_classification()
+"""
+
+
+# Import libraries
 from operator import itemgetter
 
 import torch
 
 from tqdm.auto import tqdm
-
 from .utils import AverageMeter
 
-
-# ## <font style="color:green">train_hook_default</font>
-#
-# Default train loop function for single epoch. 
-#
-# **Parameters:**
-#
-# - `model` (`nn.Module`): torch model which will be train.
-#
-#
-# - `loader` (`torch.utils.DataLoader`): dataset loader.
-#
-#
-# - `loss_fn` (`callable`): loss function.
-#
-#
-# - `optimizer` (`torch.optim.Optimizer`): Optimizer.
-#
-#
-# - `device` (`str`): Specifies device at which samples will be uploaded.
-#
-#
-# - `data_getter` (`Callable`): function object to extract input data from the sample prepared by dataloader.
-#
-#
-# - `target_getter` (`Callable`): function object to extract target data from the sample prepared by dataloader.
-#
-#
-# - `iterator_type` (`iterator`): type of the iterator. e.g. tqdm
-#
-#
-# - `prefix` (`string`): prefix which will be add to the description string of progress bar.
-#
-#
-# - `stage_progress` (`bool`): if True then progress bar will be show.
-#
 
 def train_hook_default(
     model,
@@ -73,7 +34,7 @@ def train_hook_default(
 ):
     """ Default train loop function.
 
-    Arguments:
+    Args:
         model (nn.Module): torch model which will be train.
         loader (torch.utils.DataLoader): dataset loader.
         loss_fn (callable): loss function.
@@ -108,36 +69,6 @@ def train_hook_default(
     return {"loss": loss_avg.avg}
 
 
-# ## <font style="color:green">test_hook_default</font>
-#
-# Default test loop function for single epoch. 
-#
-# **Parameters:**
-#
-# - `model` (`nn.Module`): torch model which will be train.
-#
-#
-# - `loader` (`torch.utils.DataLoader`): dataset loader.
-#
-#
-# - `device` (`str`): Specifies device at which samples will be uploaded.
-#
-#
-# - `data_getter` (`Callable`): function object to extract input data from the sample prepared by dataloader.
-#
-#
-# - `target_getter` (`Callable`): function object to extract target data from the sample prepared by dataloader.
-#
-#
-# - `iterator_type` (`iterator`): type of the iterator. e.g. tqdm
-#
-#
-# - `prefix` (`string`): prefix which will be add to the description string of progress bar.
-#
-#
-# - `stage_progress` (`bool`): if True then progress bar will be show.
-#
-
 def test_hook_default(
     model,
     loader,
@@ -153,7 +84,7 @@ def test_hook_default(
 ):
     """ Default test loop function.
 
-    Arguments:
+    Args:
         model (nn.Module): torch model which will be train.
         loader (torch.utils.DataLoader): dataset loader.
         loss_fn (callable): loss function.
@@ -191,29 +122,9 @@ def test_hook_default(
     return output
 
 
-# ## <font style="color:green">end_epoch_hook_classification</font>
-#
-# To show end epoch progress bar.
-#
-# **Parameters:**
-#
-# - `iterator` (`iter`): iterator.
-#
-#
-# - `epoch` (`int`): number of epoch to store.
-#
-#
-# - `output_train` (`dict`): description of the train stage.
-#
-#
-# - `output_test` (`dict`): description of the test stage.
-#
-#
-# - `trainer` (`Trainer`): trainer object.
-
 def end_epoch_hook_classification(iterator, epoch, output_train, output_test):
     """ Default end_epoch_hook for classification tasks.
-    Arguments:
+    Args:
         iterator (iter): iterator.
         epoch (int): number of epoch to store.
         output_train (dict): description of the train stage.

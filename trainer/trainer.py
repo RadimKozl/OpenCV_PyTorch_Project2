@@ -1,15 +1,14 @@
-# # <font style="color:blue">Trainer Class</font>
-#
-# **This is a generic class for training loop.**
-#
-# Trainer class is equivalent to the `main` method. 
-#
-# In the main method, we were passing configurations, the model, optimizer, learning rate scheduler, and the number of epochs.  It was calling the method to get the train and test data loader. Using these, it is training and validating the model. During training and validation, it was also sending logs to TensorBoard and saving the model.
-#
-# The trainer class is doing the same in a more modular way so that we can experiment with different loss functions, different visualizers, different types of targets, etc. 
-#
+#!/usr/bin/python3
 
-"""Unified class to make training pipeline for deep neural networks."""
+"""Trainer Class module
+
+Class of module is a generic class for training loop.
+Trainer class is equivalent to the main method,
+class to make training pipeline for deep neural networks.
+
+"""
+
+# Import librries
 import os
 import datetime
 
@@ -26,108 +25,23 @@ from .hooks import test_hook_default, train_hook_default
 from .visualizer import Visualizer
 
 
-# ## <font style="color:blue">Trainer Class Methods and its Parameters</font>
-#
-# ### <font style="color:green">  \_\_init\_\_ </font>
-#
-# Setting different attributes.
-#
-# **Parameters:**
-#
-# - `model` : `nn.Module` - torch model to train
-#
-#         
-# - `loader_train` : `torch.utils.DataLoader` - train dataset loader.
-#
-#     
-# - `loader_test` : `torch.utils.DataLoader` - test dataset loader
-#
-#        
-# - `loss_fn` : `callable` - loss function. In the main function, the cross-entropy loss was being used; here, we can pass the loss we want to use. For example, if we are solving a regression problem, we can not use cross-entropy loss. It is better to use RMS-loss.
-#
-#
-#         
-# - `metric_fn` : `callable` - evaluation metric function. In the main function, we had loss and accuracy as our evaluation metric. Here we can pass any evaluation metric. For example, in a detection problem, we need a precision-recall metric instead of accuracy.
-#
-#         
-# - `optimizer` : `torch.optim.Optimizer` - Optimizer.
-#
-#         
-# - `lr_scheduler` : `torch.optim.LrScheduler` - Learning Rate scheduler.
-#
-#         
-# - `configuration` : `TrainerConfiguration` - a set of training process parameters.
-#
-# Here, we need a data iterator and target iterator separately, because we are writing a general trainer class. For example, for the detection problem for a single image, we might have `n`-number of objects and their coordinates. 
-#
-#         
-# - `data_getter` : `Callable` - function object to extract input data from the sample prepared by dataloader.
-#
-#         
-# - `target_getter` : `Callable` - function object to extract target data from the sample prepared by dataloader.
-#
-#         
-# - `visualizer` : `Visualizer` - optional, shows metrics values (various backends are possible). We can pass the visualizer of our choice. For example, Matplotlib based visualizer, TensorBoard based, etc.
-#
-# It is also calling its method `_register_default_hooks` what this method does we will see next. In short, this is making sure that training and validation function is registered at the time of trainer class object initiation. 
-#
-#
-# ### <font style="color:green"> _register_default_hooks </font>
-#
-# It is calling the another method `register_hook` to register training (`train_hook_default`) and validation (`test_hook_default`) functions. `train_hook_default` and `test_hook_default` are defined in the `hook`-module.  We will go in details in the module.
-#
-#
-# ### <font style="color:green"> register_hook </font>
-#
-# It is updating the key-value pair of a dictionary, where the key is string and value is a callable function.
-#
-# **Parameters:**
-#
-# - `hook_type`: `string` - hook type. For example, wether the function will be used for train or test.
-#
-#
-# - `hook_fn`: `callable` - hook function.
-#
-#
-#
-#
-# ### <font style="color:green"> fit </font>
-#
-# Taking the number of epochs and training and validating the model. It is also adding logs to the visualizer. 
-#
-# **Parameters:**
-#
-# - `epochs`: `int` - number of epochs to train model.
-#
+class Trainer:
+    """Generic class for training loop.
 
-class Trainer:  # pylint: disable=too-many-instance-attributes
-    """ Generic class for training loop.
-
-    Parameters
-    ----------
-    model : nn.Module
-        torch model to train
-    loader_train : torch.utils.DataLoader
-        train dataset loader.
-    loader_test : torch.utils.DataLoader
-        test dataset loader
-    loss_fn : callable
-        loss function
-    metric_fn : callable
-        evaluation metric function
-    optimizer : torch.optim.Optimizer
-        Optimizer
-    lr_scheduler : torch.optim.LrScheduler
-        Learning Rate scheduler
-    configuration : TrainerConfiguration
-        a set of training process parameters
-    data_getter : Callable
-        function object to extract input data from the sample prepared by dataloader.
-    target_getter : Callable
-        function object to extract target data from the sample prepared by dataloader.
-    visualizer : Visualizer, optional
-        shows metrics values (various backends are possible)
-    # """
+    Attributes::
+        model (nn.Module): torch model to train
+        loader_train (torch.utils.DataLoader): train dataset loader.
+        loader_test (torch.utils.DataLoader): test dataset loader
+        loss_fn (callable): loss function
+        metric_fn (callable): evaluation metric function
+        optimizer (torch.optim.Optimizer): Optimizer
+        lr_scheduler (torch.optim.LrScheduler): Learning Rate scheduler
+        configuration (TrainerConfiguration): a set of training process parameters
+        data_getter (Callable): function object to extract input data from the sample prepared by dataloader.
+        target_getter (Callable): function object to extract target data from the sample prepared by dataloader.
+        visualizer (Visualizer, optional): shows metrics values (various backends are possible)
+    """
+    
     def __init__( # pylint: disable=too-many-arguments
         self,
         model: torch.nn.Module,
@@ -147,6 +61,26 @@ class Trainer:  # pylint: disable=too-many-instance-attributes
         visualizer: Union[Visualizer, None] = None,
         get_key_metric: Callable = itemgetter("top1"),
     ):
+        """Init method of class
+
+        Args:
+            model (torch.nn.Module): torch model to train
+            loader_train (torch.utils.data.DataLoader): train dataset loader.
+            loader_test (torch.utils.data.DataLoader): test dataset loader
+            loss_fn (Callable): loss function
+            metric_fn (Callable): evaluation metric function
+            optimizer (torch.optim.Optimizer): Optimizer
+            lr_scheduler (Callable): Learning Rate scheduler
+            device (Union[torch.device, str], optional): setting type of calculation device CPU/GPU. Defaults to "cuda".
+            model_saving_frequency (int, optional): frquency of save model. Defaults to 1.
+            save_dir (Union[str, Path], optional):path of save directory of model. Defaults to "checkpoints".
+            model_name_prefix (str, optional): name model for save. Defaults to "model".
+            data_getter (Callable, optional): function object to extract input data from the sample prepared by dataloader.. Defaults to itemgetter("image").
+            target_getter (Callable, optional): function object to extract target data from the sample prepared by dataloader.. Defaults to itemgetter("target").
+            stage_progress (bool, optional): step of training in progress. Defaults to True.
+            visualizer (Union[Visualizer, None], optional): shows metrics values (various backends are possible). Defaults to None.
+            get_key_metric (Callable, optional): identificient of metric. Defaults to itemgetter("top1").
+        """        
         self.model = model
         self.loader_train = loader_train
         self.loader_test = loader_test
@@ -168,11 +102,14 @@ class Trainer:  # pylint: disable=too-many-instance-attributes
         self._register_default_hooks()
 
     def fit(self, epochs):
-        """ Fit model method.
+        """Fit model method.
 
-        Arguments:
+        Args:
             epochs (int): number of epochs to train model.
+        Returns:
+            dict: return data of metric
         """
+        
         iterator = tqdm(range(epochs), dynamic_ncols=True)
         for epoch in iterator:
             output_train = self.hooks["train"](
@@ -227,15 +164,18 @@ class Trainer:  # pylint: disable=too-many-instance-attributes
         return self.metrics
 
     def register_hook(self, hook_type, hook_fn):
-        """ Register hook method.
+        """Method for register hook method.
 
-        Arguments:
+        Args:
             hook_type (string): hook type.
-            hook_fn (callable): hook function.
+            hook_fn (callable):hook function.
         """
+        
         self.hooks[hook_type] = hook_fn
 
     def _register_default_hooks(self):
+        """Registration method
+        """        
         self.register_hook("train", train_hook_default)
         self.register_hook("test", test_hook_default)
         self.register_hook("end_epoch", None)
