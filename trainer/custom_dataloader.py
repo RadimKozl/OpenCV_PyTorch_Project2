@@ -7,6 +7,7 @@ This module store class for create PyTorch Dataloader from JSON file
 
 # Import libraries
 import json
+import numpy as np
 
 from torch.utils.data import Dataset
 from torchvision.transforms import functional as F
@@ -184,3 +185,35 @@ class JsonClassificationDataset(Dataset):
             list(str): list of names of class
         """        
         return list(self.config_datatasets['datasets'][0]['names_class'])
+    
+    def calculate_mean_std_manual(self):
+        """Method for manually calculating mean and standard deviation of the dataset.
+
+        Returns:
+            tuple: mean and std for each channel (R, G, B)
+        """
+        mean = np.zeros(3)
+        mean_sqrd = np.zeros(3)
+        n_pixels = 0
+
+        for img_path in self.data_dict['image_path']:
+            # Load image
+            image = Image.open(img_path).convert("RGB")
+            image = np.array(image).astype(np.float32) / 255.0  # Normalize to [0,1]
+
+            # Add to the total pixel count
+            n_pixels += image.shape[0] * image.shape[1]
+
+            # Calculate per-channel mean and squared mean
+            mean += np.mean(image, axis=(0, 1))
+            mean_sqrd += np.mean(image ** 2, axis=(0, 1))
+
+        # Calculate final mean
+        mean /= len(self.data_dict['image_path'])
+
+        # Calculate variance and std (per-channel)
+        variance = (mean_sqrd / len(self.data_dict['image_path'])) - (mean ** 2)
+        std = np.sqrt(variance)
+
+        print(f"Mean: {mean}, Std: {std}")
+        return mean, std
