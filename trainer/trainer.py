@@ -168,7 +168,7 @@ class Trainer:
 
         Args:
             hook_type (string): hook type.
-            hook_fn (callable):hook function.
+            hook_fn (callable): hook function.
         """
         
         self.hooks[hook_type] = hook_fn

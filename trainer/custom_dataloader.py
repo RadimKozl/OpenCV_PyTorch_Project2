@@ -20,7 +20,7 @@ class JsonClassificationDataset(Dataset):
     Args:
         Dataset (class): PyTorch Dataset class
     """    
-    def __init__(self, json_file, type_data='train', dataset_number=0, image_shape=None, transform=None):
+    def __init__(self, json_file, type_data='train', dataset_number=0, image_shape=None, transform=None, ):
         """Init method of class
 
         Args:
