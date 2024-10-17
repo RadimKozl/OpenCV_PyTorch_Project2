@@ -8,12 +8,26 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 
-class Visualizer(ABC):
-    """Abstract class of Visualizer Base class
-
+class LogSetting(ABC):
+    """Abstract class of Logs for TensorBoard
     Args:
         ABC (class): Abstract class constructor
     """    
+    
+    @abstractmethod
+    def update(self):
+        """Update method
+        """
+        pass
+    
+
+class Visualizer(LogSetting):
+    """Abstract class of Visualizer Base class
+
+    Args:
+        LogSetting (class): Abstract class 
+    """
+          
     @abstractmethod
     def update_charts(
         self, 
