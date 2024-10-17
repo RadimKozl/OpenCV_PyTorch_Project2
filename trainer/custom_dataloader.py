@@ -178,7 +178,7 @@ class JsonClassificationDataset(Dataset):
         """        
         return self.num_classes
     
-    def names_of_classe(self):
+    def names_of_class(self):
         """Method return names of classes
 
         Returns:

@@ -4,10 +4,12 @@
 """
 
 # Import libraries
+import torch
 from torch.utils.tensorboard import SummaryWriter
 from typing import Any
 
-from .visualizer import LogSetting, Visualizer
+from .visualizer import Visualizer, LogSetting
+
 
 # Define Summary writer from PyTorch
 def set_writer(path: Any = None):
@@ -106,6 +108,69 @@ class ModelVisualizer(LogSetting):
         """        
         self.writer.add_graph(self.model, self.inputs)
         
+    def close_tensorboard(self):
+        """Close method of class, close defined SummaryWriter()
+        """        
+        self.writer.close()
+        
+
+class DataEmbedingVisualizer(LogSetting):
+    """Class of Data Embeding for TensorBoard
+
+    Args:
+        LogSetting (class): Abstract class of LogSetting Base class
+    """    
+    def __init__(self, dataset, class_labels, writer,  number_samples=100, global_step=1, tag="embedings"):
+        """Init method of class
+
+        Args:
+            dataset (obj): return data of samples and data of labels
+            class_labels (list): list of class labels names
+            writer (class): summary writer from PyTorch
+            number_samples (int, optional): number selected samples. Defaults to 100.
+            global_step (int, optional): number of step. Defaults to 1.
+            tag (str, optional): tag of destription. Defaults to "embedings".
+        """        
+        super().__init__()
+        self.writer = writer
+        self.number_samples = number_samples
+        self.inputs, self.targets = dataset
+        self.class_labels = class_labels
+        self.global_step = global_step
+        self.tag = tag
+        
+    def _get_random_inputs_labels(self):
+        """Method get random inputs and labels
+        """        
+        assert len(self.inputs) == len(self.targets)
+
+        rand_indices = torch.randperm(len(self.targets))
+        
+        data = self.inputs[rand_indices][:self.number_samples]
+        
+        labels = self.targets[rand_indices][:self.number_samples]
+        
+        class_labels = [self.class_labels[lab] for lab in labels]
+        
+        return data, class_labels
+            
+    
+    def update_charts(self):
+        """
+        Add a few inputs and labels to tensorboard. 
+        """
+        
+        images, labels = self._get_random_inputs_labels()
+        
+        # Add image as embedding to tensorboard
+        self.writer.add_embedding(mat = images.view(-1, 28 * 28), 
+                                metadata=labels, 
+                                label_img=images.unsqueeze(1),
+                                global_step=self.global_step,
+                                tag=self.tag)
+        return
+
+    
     def close_tensorboard(self):
         """Close method of class, close defined SummaryWriter()
         """        
