@@ -8,9 +8,10 @@ Implements helper functions.
 
 # Import libraries
 import random
-
 import numpy as np
+
 import torch
+import torch.nn.functional as F
 
 from .configuration import SystemConfig, TrainerConfig, DataloaderConfig
 
@@ -91,3 +92,57 @@ def setup_system(system_config: SystemConfig) -> None:
         torch.cuda.manual_seed_all(system_config.seed)
         torch.backends.cudnn_benchmark_enabled = system_config.cudnn_benchmark_enabled
         torch.backends.cudnn.deterministic = system_config.cudnn_deterministic
+
+
+def prediction(model, device, batch_input, max_prob=True):
+    """
+    get prediction for batch inputs
+    """
+    
+    # send model to cpu/cuda according to your system configuration
+    model.to(device)
+    
+    # it is important to do model.eval() before prediction
+    model.eval()
+
+    data = batch_input.to(device)
+
+    output = model(data)
+
+    # get probability score using softmax
+    prob = F.softmax(output, dim=1)
+    
+    if max_prob:
+        # get the max probability
+        pred_prob = prob.data.max(dim=1)[0]
+    else:
+        pred_prob = prob.data
+    
+    # get the index of the max probability
+    pred_index = prob.data.max(dim=1)[1]
+    
+    return pred_index.cpu().numpy(), pred_prob.cpu().numpy()
+
+
+def get_target_and_prob(model, dataloader, device):
+    """
+    get targets and prediction probabilities
+    """
+    
+    pred_prob = []
+    targets = []
+    
+    for _, (data, target) in enumerate(dataloader):
+        
+        _, prob = prediction(model, device, data, max_prob=False)
+        
+        pred_prob.append(prob)
+        
+        target = target.numpy()
+        targets.append(target)
+        
+    targets = np.concatenate(targets)
+    targets = targets.astype(int)
+    pred_prob = np.concatenate(pred_prob, axis=0)
+    
+    return targets, pred_prob

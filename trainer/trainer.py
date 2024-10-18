@@ -23,6 +23,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from .hooks import test_hook_default, train_hook_default
 from .visualizer import Visualizer
+from .tensorboard_visualizer import WeightsHistogramVisualizer, PRVisualizer
 
 
 class Trainer:
@@ -59,6 +60,8 @@ class Trainer:
         target_getter: Callable = itemgetter("target"),
         stage_progress: bool = True,
         visualizer: Union[Visualizer, None] = None,
+        weighthistogram: Union[WeightsHistogramVisualizer, None] = None,
+        pr_visualizer: Union[PRVisualizer, None] = None,
         get_key_metric: Callable = itemgetter("top1"),
     ):
         """Init method of class
@@ -79,6 +82,8 @@ class Trainer:
             target_getter (Callable, optional): function object to extract target data from the sample prepared by dataloader.. Defaults to itemgetter("target").
             stage_progress (bool, optional): step of training in progress. Defaults to True.
             visualizer (Union[Visualizer, None], optional): shows metrics values (various backends are possible). Defaults to None.
+            weighthistogram (Union[WeightsHistogramVisualizer, None], optional) show weight histogram. Defaults to None.
+            pr_visualizer (Union[PRVisualizer, None], optional) show PR curves. Default to None.
             get_key_metric (Callable, optional): identificient of metric. Defaults to itemgetter("top1").
         """        
         self.model = model
@@ -97,6 +102,8 @@ class Trainer:
         self.target_getter = target_getter
         self.hooks = {}
         self.visualizer = visualizer
+        self.weighthistogram = weighthistogram
+        self.pr_visualizer = pr_visualizer
         self.get_key_metric = get_key_metric
         self.metrics = {"epoch": [], "train_loss": [], "test_loss": [], "test_metric": []}
         self._register_default_hooks()
@@ -151,6 +158,12 @@ class Trainer:
                     self.lr_scheduler.step(output_train['loss'])
                 else:
                     self.lr_scheduler.step()
+                    
+            if self.weighthistogram:
+                self.weighthistogram.update_charts(model=self.model, epoch=epoch)
+                
+            if self.pr_visualizer:
+                self.pr_visualizer.update_charts(model=self.model, device=self.device, epoch=epoch)
 
             if self.hooks["end_epoch"] is not None:
                 self.hooks["end_epoch"](iterator, epoch, output_train, output_test)

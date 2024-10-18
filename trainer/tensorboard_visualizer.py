@@ -9,6 +9,7 @@ from torch.utils.tensorboard import SummaryWriter
 from typing import Any
 
 from .visualizer import Visualizer
+from .utils import get_target_and_prob
 
 
 # Define Summary writer from PyTorch
@@ -96,7 +97,7 @@ class ModelVisualizer:
         Args:
             model (torch.nn.Module): model definition
             inputs (torch.utils.data.DataLoader): inputs for models
-            writer (class): summary writer from PyTorch
+            writer (obj): summary writer from PyTorch
         """        
         super().__init__() 
         self.model = model
@@ -126,7 +127,7 @@ class DataEmbedingVisualizer:
         Args:
             dataset (obj): return data of samples and data of labels
             class_labels (list): list of class labels names
-            writer (class): summary writer from PyTorch
+            writer (obj): summary writer from PyTorch
             number_samples (int, optional): number selected samples. Defaults to 100.
             global_step (int, optional): number of step. Defaults to 1.
             tag (str, optional): tag of destription. Defaults to "embedings".
@@ -155,8 +156,81 @@ class DataEmbedingVisualizer:
                                 tag=self.tag)
         return
 
+    def close_tensorboard(self):
+        """Close method of class, close defined SummaryWriter()
+        """        
+        self.writer.close()
+        
+class WeightsHistogramVisualizer:
+    """Class for adding histograms of weights
+    """    
+    def __init__(self, writer):
+        """Init method of class
+
+        Args:
+            writer (obj): summary writer from PyTorch
+            
+        """
+        super().__init__()
+        self.writer = writer
+        
+    def update_charts(self, model, epoch):
+        """Metod for adding histogram to TenroBoard
+
+        Args:
+            model (torch.nn.Module): trained model
+            epoch (int): epoch number
+        """        
+        
+        for name, param in model.named_parameters():
+            self.writer.add_histogram(name.replace('.', '/'), param.data.cpu().abs(), epoch)
+            
+        return
     
     def close_tensorboard(self):
         """Close method of class, close defined SummaryWriter()
         """        
         self.writer.close()
+
+    
+class PRVisualizer:
+    """Class for adding PR curve to the TensorBoard
+    """    
+    def __init__(self, dataloader, writer, name_classes):
+        """Init method of class
+
+        Args:
+            dataloader (torch.utils.data.DataLoader): validation dataset loader
+            writer (obj): summary writer from PyTorch
+            name_classes (list): list of names classes
+        """        
+        self.dataloader = dataloader
+        self.writer = writer
+        self.name_classes = name_classes
+        self.num_classes = len(self.name_classes)
+    
+    def update_charts(self, model, device, epoch):
+        """Method for adding PR curve
+
+        Args:
+            model (torch.nn.Module): torch model to validate
+            device (torch.device): setting type of calculation device CPU/GPU. Defaults to "cuda".
+            epoch (int): epoch number
+        """        
+        targets, pred_prob = get_target_and_prob(model, self.dataloader, device)
+        
+        for cls_idx in range(self.num_classes):
+            binary_target = targets == cls_idx
+            true_prediction_prob = pred_prob[:, cls_idx]
+        
+            self.writer.add_pr_curve(self.name_classes[cls_idx], 
+                                binary_target, 
+                                true_prediction_prob, 
+                                global_step=epoch)
+        
+    
+    def close_tensorboard(self):
+        """Close method of class, close defined SummaryWriter()
+        """        
+        self.writer.close()
+        
