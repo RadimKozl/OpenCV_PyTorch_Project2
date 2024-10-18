@@ -134,7 +134,6 @@ class DataEmbedingVisualizer:
         super().__init__()
         self.writer = writer
         self.number_samples = number_samples
-        self.inputs, self.targets = dataset
         self.global_step = global_step
         self.tag = tag
         self.dataset = dataset
