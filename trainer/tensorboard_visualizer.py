@@ -8,7 +8,7 @@ import torch
 from torch.utils.tensorboard import SummaryWriter
 from typing import Any
 
-from .visualizer import Visualizer, LogSetting
+from .visualizer import Visualizer
 
 
 # Define Summary writer from PyTorch
@@ -84,7 +84,7 @@ class TensorBoardVisualizer(Visualizer):
         self.writer.close()
 
 
-class ModelVisualizer(LogSetting):
+class ModelVisualizer:
     """Class of visualize graph of model inside TensorBoard
 
     Args:
@@ -114,7 +114,7 @@ class ModelVisualizer(LogSetting):
         self.writer.close()
         
 
-class DataEmbedingVisualizer(LogSetting):
+class DataEmbedingVisualizer:
     """Class of Data Embeding for TensorBoard
 
     Args:

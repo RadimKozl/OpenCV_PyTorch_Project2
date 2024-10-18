@@ -7,21 +7,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-
-class LogSetting(ABC):
-    """Abstract class of Logs for TensorBoard
-    Args:
-        ABC (class): Abstract class constructor
-    """    
-    
-    @abstractmethod
-    def update(self):
-        """Update method
-        """
-        pass
-    
-
-class Visualizer(LogSetting):
+class Visualizer(ABC):
     """Abstract class of Visualizer Base class
 
     Args:
