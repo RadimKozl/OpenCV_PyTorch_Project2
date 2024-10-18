@@ -120,7 +120,7 @@ class DataEmbedingVisualizer:
     Args:
         LogSetting (class): Abstract class of LogSetting Base class
     """    
-    def __init__(self, dataset, class_labels, writer,  number_samples=100, global_step=1, tag="embedings"):
+    def __init__(self, dataset, writer, number_samples=100, num_workers=2, shuffle=True, global_step=1, tag="embedings"):
         """Init method of class
 
         Args:
@@ -135,32 +135,19 @@ class DataEmbedingVisualizer:
         self.writer = writer
         self.number_samples = number_samples
         self.inputs, self.targets = dataset
-        self.class_labels = class_labels
         self.global_step = global_step
         self.tag = tag
+        self.dataset = dataset
+        self.num_workers = num_workers
+        self.shuffle = shuffle
         
-    def _get_random_inputs_labels(self):
-        """Method get random inputs and labels
-        """        
-        assert len(self.inputs) == len(self.targets)
-
-        rand_indices = torch.randperm(len(self.targets))
-        
-        data = self.inputs[rand_indices][:self.number_samples]
-        
-        labels = self.targets[rand_indices][:self.number_samples]
-        
-        class_labels = [self.class_labels[lab] for lab in labels]
-        
-        return data, class_labels
-            
-    
     def update_charts(self):
         """
         Add a few inputs and labels to tensorboard. 
         """
+        dataloader = torch.utils.data.DataLoader(self.dataset, batch_size=self.number_samples, num_workers=self.num_workers, shuffle=self.shuffle)
         
-        images, labels = self._get_random_inputs_labels()
+        images, labels = next(iter(dataloader))
         
         # Add image as embedding to tensorboard
         self.writer.add_embedding(mat = images.view(-1, 28 * 28), 

@@ -89,9 +89,11 @@ class DataloaderConfig:
     Args:
         batch_size (int, optional): Amount of data to pass through the network at each forward-backward iteration
         num_workers (int, optional): Number of concurrent processes using to prepare data, for free Colab num_workers=2, for free Kaggle num_workers=4
+        data_augmentation (bool, optional): Value for setting augmentation method of data
     """    
     batch_size: int = 250
     num_workers: int = 2
+    data_augmentation: bool = False
     
     @classmethod
     def from_yaml(cls, config: dict):
@@ -107,7 +109,8 @@ class DataloaderConfig:
         
         return cls(
             batch_size=dataloader_config.get('batch_size', cls.batch_size),
-            num_workers=dataloader_config.get('num_workers', cls.num_workers)
+            num_workers=dataloader_config.get('num_workers', cls.num_workers),
+            data_augmentation=dataloader_config.get('data_augmentation', cls.data_augmentation)
         )
 
 

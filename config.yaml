@@ -10,6 +10,7 @@ dataset:
 dataloader:
   batch_size: 50
   num_workers: 4
+  data_augmentation: false
 
 optimizer:
   learning_rate: 0.001
