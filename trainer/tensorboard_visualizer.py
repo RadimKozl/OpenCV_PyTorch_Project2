@@ -148,8 +148,11 @@ class DataEmbedingVisualizer:
         
         images, labels = next(iter(dataloader))
         
+        print(len(images))
+        print(len(labels))
+        
         # Add image as embedding to tensorboard
-        self.writer.add_embedding(mat = images.view(-1, 28 * 28), 
+        self.writer.add_embedding(mat = images.view(-1, 3 * 224 * 224), 
                                 metadata=labels, 
                                 label_img=images.unsqueeze(1),
                                 global_step=self.global_step,
