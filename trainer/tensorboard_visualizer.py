@@ -120,7 +120,7 @@ class DataEmbedingVisualizer:
     Args:
         LogSetting (class): Abstract class of LogSetting Base class
     """    
-    def __init__(self, dataset, writer, number_samples=100, num_workers=2, shuffle=True, global_step=1, tag="embedings"):
+    def __init__(self, dataset, writer, number_samples=100, num_workers=2, shuffle=True, tag="embedings"):
         """Init method of class
 
         Args:
@@ -134,7 +134,6 @@ class DataEmbedingVisualizer:
         super().__init__()
         self.writer = writer
         self.number_samples = number_samples
-        self.global_step = global_step
         self.tag = tag
         self.dataset = dataset
         self.num_workers = num_workers
@@ -148,14 +147,11 @@ class DataEmbedingVisualizer:
         
         images, labels = next(iter(dataloader))
         
-        print(len(images))
-        print(len(labels))
         
         # Add image as embedding to tensorboard
         self.writer.add_embedding(mat = images.view(-1, 3 * 224 * 224), 
-                                metadata=labels, 
-                                label_img=images.unsqueeze(1),
-                                global_step=self.global_step,
+                                metadata=labels,
+                                label_img=images,
                                 tag=self.tag)
         return
 
