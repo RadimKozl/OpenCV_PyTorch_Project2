@@ -6,10 +6,15 @@
 # Import libraries
 import torch
 from torch.utils.tensorboard import SummaryWriter
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 from typing import Any
 
 from .visualizer import Visualizer
-from .utils import get_target_and_prob
+from .utils import get_target_and_prob, get_target_and_classes_cm
+
+import matplotlib.pyplot as plt  # one of the best graphics library for python
+plt.style.use('ggplot')
 
 
 # Define Summary writer from PyTorch
@@ -227,10 +232,65 @@ class PRVisualizer:
                                 binary_target, 
                                 true_prediction_prob, 
                                 global_step=epoch)
-        
+        return
     
     def close_tensorboard(self):
         """Close method of class, close defined SummaryWriter()
         """        
         self.writer.close()
         
+        
+class ConfusionMatrixVisualizer:
+    """Class for save Confusion Matrix to TensorBoard
+    """    
+    def __init__(self, writer, dataloader, class_names, normalize=True):
+        """Init method of class
+
+        Args:
+            writer (obj): summary writer from PyTorch
+            dataloader (torch.utils.data.DataLoader): torch model to validate
+            class_names (list): list of names classes
+            normalize (bool, optional): parameter for setting of normalization. Defaults to True.
+        """        
+        self.writer = writer
+        self.dataloader = dataloader
+        self.class_names = class_names
+        self.normalize = normalize
+    
+    def update_charts(self, model, device, epoch):
+        """Method for saving Confusion Matrix
+
+        Args:
+            model (torch.nn.Module): torch model to validate
+            device (torch.device): setting type of calculation device CPU/GPU. Defaults to "cuda".
+            epoch (int): epoch number
+        """        
+        # Get true targets and predicted classes
+        targets, pred_classes = get_target_and_classes_cm(model, self.dataloader, device)
+        
+        # Compute the confusion matrix
+        cm = confusion_matrix(targets, pred_classes, normalize='true' if self.normalize else None)
+        
+        # Create a plot using matplotlib
+        fig, ax = plt.subplots(figsize=(8, 8))
+        sns.heatmap(cm, annot=True, fmt='.2f', cmap='Blues', xticklabels=self.class_names, yticklabels=self.class_names)
+        
+        ax.set_xlabel('Predicted labels')
+        ax.set_ylabel('True labels')
+        ax.set_title(f'Confusion Matrix at Epoch {epoch}')
+        
+        # Add the confusion matrix figure to TensorBoard
+        self.writer.add_figure('Confusion Matrix', fig, global_step=epoch)
+    
+        # Close the plot to free memory
+        plt.close(fig)
+        
+        return
+    
+    def close_tensorboard(self):
+        """Close method of class, close defined SummaryWriter()
+        """        
+        self.writer.close()
+    
+        
+    

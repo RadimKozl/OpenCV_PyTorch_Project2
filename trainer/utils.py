@@ -7,6 +7,7 @@ Implements helper functions.
 """
 
 # Import libraries
+import os
 import random
 import numpy as np
 
@@ -146,3 +147,81 @@ def get_target_and_prob(model, dataloader, device):
     pred_prob = np.concatenate(pred_prob, axis=0)
     
     return targets, pred_prob
+
+
+def get_target_and_classes_cm(model, dataloader, device):
+    """
+    Get true targets and predicted classes from the model.
+    """
+    model.eval()
+    targets = []
+    pred_classes = []
+    
+    with torch.no_grad():
+        for data, target in dataloader:
+            data = data.to(device)
+            target = target.to(device)
+            
+            # Get model output (logits or probabilities)
+            output = model(data)
+            
+            # Get predicted classes (use argmax to get the index of the highest probability)
+            pred = torch.argmax(output, dim=1)
+            
+            # Append to lists
+            pred_classes.append(pred.cpu().numpy())
+            targets.append(target.cpu().numpy())
+    
+    # Convert lists to numpy arrays
+    targets = np.concatenate(targets)
+    pred_classes = np.concatenate(pred_classes)
+    
+    return targets, pred_classes
+
+
+def save_model(model, device, model_dir='models', model_file_name='model.pt'):
+    """Function of save model
+
+    Args:
+        model (torch.nn.Module): torch model for save
+        device (torch.device): setting type of calculation device CPU/GPU. Defaults to "cuda"
+        model_dir (str, optional): save directory. Defaults to 'models'.
+        model_file_name (str, optional): file name of model. Defaults to 'model.pt'.
+    """    
+    
+    if not os.path.exists(model_dir):
+        os.makedirs(model_dir)
+
+    model_path = os.path.join(model_dir, model_file_name)
+
+    # make sure you transfer the model to cpu.
+    if device == 'cuda':
+        model.to('cpu')
+
+    # save the state_dict
+    torch.save(model.state_dict(), model_path)
+    
+    if device == 'cuda':
+        model.to('cuda')
+    
+    return
+
+
+def load_model(model, model_dir='models', model_file_name='model.pt', weights_only=False):
+    """Function for load model
+
+    Args:
+        model (torch.nn.Module): torch model for save
+        model_dir (str, optional): save directory. Defaults to 'models'.
+        model_file_name (str, optional): file name of model. Defaults to 'model.pt'.
+        weights_only (bool, optional): value for setting load weights of model. Defaults to False.
+
+    Returns:
+        torch.nn.Module: return load model
+    """    
+    model_path = os.path.join(model_dir, model_file_name)
+
+    # loading the model and getting model parameters by using load_state_dict
+    model.load_state_dict(torch.load(model_path, weights_only=weights_only))
+    
+    return model

@@ -24,6 +24,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from .hooks import test_hook_default, train_hook_default
 from .visualizer import Visualizer
 from .tensorboard_visualizer import WeightsHistogramVisualizer, PRVisualizer
+from .tensorboard_visualizer import ConfusionMatrixVisualizer
 
 
 class Trainer:
@@ -62,6 +63,7 @@ class Trainer:
         visualizer: Union[Visualizer, None] = None,
         weighthistogram: Union[WeightsHistogramVisualizer, None] = None,
         pr_visualizer: Union[PRVisualizer, None] = None,
+        confusion_matrix_visualizer: Union[ConfusionMatrixVisualizer, None] = None,
         get_key_metric: Callable = itemgetter("top1"),
     ):
         """Init method of class
@@ -84,6 +86,7 @@ class Trainer:
             visualizer (Union[Visualizer, None], optional): shows metrics values (various backends are possible). Defaults to None.
             weighthistogram (Union[WeightsHistogramVisualizer, None], optional) show weight histogram. Defaults to None.
             pr_visualizer (Union[PRVisualizer, None], optional) show PR curves. Default to None.
+            confusion_matrix_visualizer (Union[ConfusionMatrixVisualizer, None], optional) show Confusion Matrix. Default to None.
             get_key_metric (Callable, optional): identificient of metric. Defaults to itemgetter("top1").
         """        
         self.model = model
@@ -104,6 +107,7 @@ class Trainer:
         self.visualizer = visualizer
         self.weighthistogram = weighthistogram
         self.pr_visualizer = pr_visualizer
+        self.confusion_matrix_visualizer = confusion_matrix_visualizer
         self.get_key_metric = get_key_metric
         self.metrics = {"epoch": [], "train_loss": [], "test_loss": [], "test_metric": []}
         self._register_default_hooks()
@@ -159,10 +163,13 @@ class Trainer:
                 else:
                     self.lr_scheduler.step()
                     
-            if self.weighthistogram:
+            if self.weighthistogram is not None:
                 self.weighthistogram.update_charts(model=self.model, epoch=epoch)
-                
-            if self.pr_visualizer:
+            
+            if self.confusion_matrix_visualizer is not None:
+                self.confusion_matrix_visualizer.update_charts(model=self.model, device=self.device, epoch=epoch)
+            
+            if self.pr_visualizer is not None:
                 self.pr_visualizer.update_charts(model=self.model, device=self.device, epoch=epoch)
 
             if self.hooks["end_epoch"] is not None:

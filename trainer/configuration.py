@@ -166,6 +166,7 @@ class TrainerConfig:
         log_interval (int, optional): Frequency of train data save to tensorboard. 
         test_interval (int, optional): Frequency of validation testing   
         progress_bar (bool, optional): Enable progress bar visualization during train process
+        normalization (bool, optional): Enable normalization of confusion matrix
     """    
     model_dir: str = "checkpoints"
     model_saving_frequency: int = 1
@@ -174,6 +175,7 @@ class TrainerConfig:
     log_interval: int = 5  
     test_interval: int = 1  
     progress_bar: bool = True
+    normalization: bool = True
     
     @classmethod
     def from_yaml(cls, config: dict):
@@ -194,7 +196,8 @@ class TrainerConfig:
             epoch_num=trainer_config.get('epoch_num', cls.epoch_num),
             log_interval=trainer_config.get('log_interval', cls.log_interval),
             test_interval=trainer_config.get('test_interval', cls.test_interval),
-            progress_bar=trainer_config.get('progress_bar', cls.progress_bar)
+            progress_bar=trainer_config.get('progress_bar', cls.progress_bar),
+            normalization=trainer_config.get('normalization', cls.normalization)
         )
         
 
