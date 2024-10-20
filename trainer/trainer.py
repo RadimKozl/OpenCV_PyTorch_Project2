@@ -186,7 +186,7 @@ class Trainer:
                 os.makedirs(self.save_dir, exist_ok=True)
                 torch.save(
                     self.model.state_dict(),
-                    os.path.join(self.save_dir, self.model_name_prefix) + str(datetime.datetime.now() + '.pt')
+                    os.path.join(self.save_dir, self.model_name_prefix) + '.pt'
                 )
                 
         return self.metrics
