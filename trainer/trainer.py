@@ -171,7 +171,7 @@ class Trainer:
             
             if self.pr_visualizer is not None:
                 self.pr_visualizer.update_charts(model=self.model, device=self.device, epoch=epoch)
-
+                
             if self.hooks["end_epoch"] is not None:
                 self.hooks["end_epoch"](iterator, epoch, output_train, output_test)
 
@@ -181,6 +181,14 @@ class Trainer:
                     self.model.state_dict(),
                     os.path.join(self.save_dir, self.model_name_prefix) + str(datetime.datetime.now())
                 )
+                
+            if epoch == (epochs - 1):
+                os.makedirs(self.save_dir, exist_ok=True)
+                torch.save(
+                    self.model.state_dict(),
+                    os.path.join(self.save_dir, self.model_name_prefix) + str(datetime.datetime.now() + '.pt')
+                )
+                
         return self.metrics
 
     def register_hook(self, hook_type, hook_fn):

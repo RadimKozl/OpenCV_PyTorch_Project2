@@ -11,10 +11,16 @@ import os
 import random
 import numpy as np
 
+from .configuration import SystemConfig, TrainerConfig, DataloaderConfig
+
 import torch
 import torch.nn.functional as F
+import seaborn as sns
 
-from .configuration import SystemConfig, TrainerConfig, DataloaderConfig
+from sklearn.metrics import confusion_matrix
+
+import matplotlib.pyplot as plt  # one of the best graphics library for python
+plt.style.use('ggplot')
 
 
 class AverageMeter:
@@ -48,7 +54,6 @@ class AverageMeter:
         self.sum += val * count
         self.count += count
         self.avg = self.sum / self.count
-
 
 
 
@@ -177,6 +182,42 @@ def get_target_and_classes_cm(model, dataloader, device):
     pred_classes = np.concatenate(pred_classes)
     
     return targets, pred_classes
+
+def plot_normalized_confusion_matrix(predictions, targets, class_names, norm=True):
+    """
+    Plots the normalized confusion matrix using seaborn and matplotlib.
+
+    Parameters:
+      - predictions: Predicted classes (cls)
+      - targets: Real classes (targets)
+      - class_names: List of class names
+    """
+    # Calculate the confusion matrix
+    cm = confusion_matrix(targets, predictions)
+
+    # Normalization of the confusion matrix
+    cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis] * 100
+
+    if norm:
+      # Render using seaborn heatmap
+      plt.figure(figsize=(8, 6))
+      sns.heatmap(cm_normalized, annot=True, fmt='.2f', cmap='Blues',
+                  xticklabels=class_names, yticklabels=class_names)
+
+      plt.title("Normalized Confusion Matrix")
+      plt.xlabel("Predicted Class")
+      plt.ylabel("True Class")
+      plt.show()
+    else:
+      # Render using seaborn heatmap
+      plt.figure(figsize=(8, 6))
+      sns.heatmap(cm, annot=True, fmt='.2f', cmap='Blues',
+                  xticklabels=class_names, yticklabels=class_names)
+
+      plt.title("Confusion Matrix")
+      plt.xlabel("Predicted Class")
+      plt.ylabel("True Class")
+      plt.show()
 
 
 def save_model(model, device, model_dir='models', model_file_name='model.pt'):
