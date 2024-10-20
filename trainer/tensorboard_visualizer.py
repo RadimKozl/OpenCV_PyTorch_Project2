@@ -238,8 +238,7 @@ class PRVisualizer:
         """Close method of class, close defined SummaryWriter()
         """        
         self.writer.close()
-        
-        
+          
 class ConfusionMatrixVisualizer:
     """Class for save Confusion Matrix to TensorBoard
     """    
