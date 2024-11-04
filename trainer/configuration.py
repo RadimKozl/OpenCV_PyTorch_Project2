@@ -168,7 +168,7 @@ class TrainerConfig:
         progress_bar (bool, optional): Enable progress bar visualization during train process
         normalization (bool, optional): Enable normalization of confusion matrix
     """    
-    model_dir: str = "checkpoints"
+    model_dir: str = "/kaggle/working/models"
     model_saving_frequency: int = 1
     device: str = "cpu"
     epoch_num: int = 50
