@@ -66,6 +66,10 @@ def train_hook_default(
             prefix, i, loss_avg.avg, loss_avg.val, optimizer.param_groups[0]["lr"]
         )
         iterator.set_description(status)
+        # Freeing up memory
+        del inputs, targets, predicts
+        torch.cuda.empty_cache()
+        
     return {"loss": loss_avg.avg}
 
 
@@ -118,6 +122,10 @@ def test_hook_default(
         if get_key_metric is not None:
             status = status + ", Metric_avg: {0:.5}".format(get_key_metric(metric_fn.get_metric_value()))
         iterator.set_description(status)
+        # Freeing up memory
+        del inputs, targets, predict
+        torch.cuda.empty_cache()
+        
     output = {"metric": metric_fn.get_metric_value(), "loss": loss_avg.avg}
     return output
 
