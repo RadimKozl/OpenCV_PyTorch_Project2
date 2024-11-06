@@ -11,7 +11,6 @@ import os
 import random
 import numpy as np
 import psutil
-import gpustat
 from datetime import datetime
 
 from .configuration import SystemConfig, TrainerConfig, DataloaderConfig
@@ -290,8 +289,5 @@ def memory_management(epoch):
     print(f"Disk Usage: {disk_usage.percent}%")
     
     ## Get GPU statistics
-    gpu_stats = gpustat.GPUStatCollection.new_query()
-    
-    ## Print GPU information
-    for gpu in gpu_stats.gpus:
-        print(f"GPU {gpu.index}: {gpu.name}, Utilization: {gpu.utilization}%")
+    max_memory_allocated = torch.cuda.max_memory_allocated(device=None)
+    print("Maximum GPU memory allocated:", max_memory_allocated / (1024 ** 2), "MB")
