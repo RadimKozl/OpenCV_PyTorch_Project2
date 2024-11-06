@@ -25,7 +25,7 @@ from .hooks import test_hook_default, train_hook_default
 from .visualizer import Visualizer
 from .tensorboard_visualizer import WeightsHistogramVisualizer, PRVisualizer
 from .tensorboard_visualizer import ConfusionMatrixVisualizer
-
+from .utils import memory_management
 
 class Trainer:
     """Generic class for training loop.
@@ -188,6 +188,8 @@ class Trainer:
                     self.model.state_dict(),
                     os.path.join(self.save_dir, self.model_name_prefix) + '.pt'
                 )
+                
+            memory_management(epoch)
                 
         return self.metrics
 

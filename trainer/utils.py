@@ -10,6 +10,9 @@ Implements helper functions.
 import os
 import random
 import numpy as np
+import psutil
+import gpustat
+from datetime import datetime
 
 from .configuration import SystemConfig, TrainerConfig, DataloaderConfig
 
@@ -266,3 +269,29 @@ def load_model(model, model_dir='models', model_file_name='model.pt', weights_on
     model.load_state_dict(torch.load(model_path, weights_only=weights_only))
     
     return model
+
+
+def memory_management(epoch):
+    """Function for show memory management of process
+
+    Args:
+        epoch (int): number of epoch
+    """    
+    
+    print(f'In {epoch}, time: {datetime.now()}')
+    
+    cpu_percent = psutil.cpu_percent(interval=1)
+    print(f"CPU Usage: {cpu_percent}%")
+    
+    memory_usage = psutil.virtual_memory()
+    print(f"Memory Usage: {memory_usage.percent}%")
+    
+    disk_usage = psutil.disk_usage('/')
+    print(f"Disk Usage: {disk_usage.percent}%")
+    
+    ## Get GPU statistics
+    gpu_stats = gpustat.GPUStatCollection.new_query()
+    
+    ## Print GPU information
+    for gpu in gpu_stats.gpus:
+        print(f"GPU {gpu.index}: {gpu.name}, Utilization: {gpu.utilization}%")
