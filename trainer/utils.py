@@ -291,3 +291,25 @@ def memory_management(epoch):
     ## Get GPU statistics
     max_memory_allocated = torch.cuda.max_memory_allocated(device=None)
     print("Maximum GPU memory allocated:", max_memory_allocated / (1024 ** 2), "MB")
+    
+
+def id_samples(path, data_type='test'):
+    """Function for selection id of samle inside dataset key is position, value is id of sample
+
+    Args:
+        path (str): path of JSON file with dataset structure
+        data_type (str, optional): This is parameter of setting type of dataset: train/valid/test. Defaults to 'test'.
+
+    Returns:
+        (dict) : return dictionary of data, key is position, value is id of sample
+    """    
+    with open(path, 'r') as f:
+        data = json.load(f)
+
+    list_data = data['datasets'][0][data_type]
+    dict_id_samples = {}
+
+    for i, item_data in enumerate(list_data):
+        dict_id_samples[i] = list(item_data.keys())[0]
+        
+    return dict_id_samples
