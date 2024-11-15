@@ -149,7 +149,7 @@ class DataEmbedingVisualizer:
         
     def update_charts(self):
         """
-        Add a few inputs and labels to tensorboard. 
+        Add a few inputs and labels to tensorboard.  
         """
         dataloader = torch.utils.data.DataLoader(self.dataset, batch_size=self.number_samples, num_workers=self.num_workers, shuffle=self.shuffle)
         
