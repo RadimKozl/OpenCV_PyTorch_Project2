@@ -126,7 +126,7 @@ class DataEmbedingVisualizer:
     Args:
         LogSetting (class): Abstract class of LogSetting Base class
     """    
-    def __init__(self, dataset, writer, number_samples=100, num_workers=2, shuffle=True, tag="embedings"):
+    def __init__(self, dataset, writer, number_samples=32, num_workers=2, shuffle=True, tag="embedings"):
         """Init method of class
 
         Args:

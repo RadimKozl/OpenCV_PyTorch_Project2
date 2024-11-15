@@ -91,7 +91,7 @@ class DataloaderConfig:
         num_workers (int, optional): Number of concurrent processes using to prepare data, for free Colab num_workers=2, for free Kaggle num_workers=4
         data_augmentation (bool, optional): Value for setting augmentation method of data
     """    
-    batch_size: int = 250
+    batch_size: int = 32
     num_workers: int = 2
     data_augmentation: bool = False
     
