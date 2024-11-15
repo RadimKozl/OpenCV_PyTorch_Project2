@@ -126,7 +126,7 @@ class DataEmbedingVisualizer:
     Args:
         LogSetting (class): Abstract class of LogSetting Base class
     """    
-    def __init__(self, dataset, writer, number_samples=100, num_workers=2, shuffle=True, tag="embedings", dimension_tensor=3 * 224 * 244):
+    def __init__(self, dataset, writer, number_samples=100, num_workers=2, shuffle=True, tag="embedings"):
         """Init method of class
 
         Args:
@@ -145,7 +145,6 @@ class DataEmbedingVisualizer:
         self.dataset = dataset
         self.num_workers = num_workers
         self.shuffle = shuffle
-        self.dimension_tensor = dimension_tensor
         
     def update_charts(self):
         """
@@ -155,9 +154,16 @@ class DataEmbedingVisualizer:
         
         images, labels = next(iter(dataloader))
         
+        # Dynamically calculate the dimension of flattened tensors
+        batch_size, channels, height, width = images.shape
+        input_shape = (batch_size, channels, height, width)
+        dimension_tensor = channels * height * width
+        
+        # Debugging information
+        print(f"batch shape: {input_shape}, tensor shape: {dimension_tensor}")
         
         # Add image as embedding to tensorboard
-        self.writer.add_embedding(mat = images.view(-1, self.dimension_tensor),
+        self.writer.add_embedding(mat = images.view(-1, dimension_tensor),
                                 metadata=labels,
                                 label_img=images,
                                 tag=self.tag)
