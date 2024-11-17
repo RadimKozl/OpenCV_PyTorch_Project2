@@ -1,0 +1,28 @@
+dataloader:
+  batch_size: 32
+  data_augmentation: true
+  num_workers: 0
+dataset:
+  json_file: datasets.json
+  root_dir: /kaggle/working
+optimizer:
+  learning_rate: 0.001
+  lr_gamma: 0.1
+  lr_step_milestones:
+  - 30
+  - 40
+  momentum: 0.9
+  weight_decay: 0.0001
+system:
+  cudnn_benchmark_enabled: false
+  cudnn_deterministic: false
+  seed: 21
+trainer:
+  device: cuda
+  epoch_num: 80
+  log_interval: 5
+  model_dir: /kaggle/working/models
+  model_saving_frequency: 1
+  normalization: true
+  progress_bar: true
+  test_interval: 1
