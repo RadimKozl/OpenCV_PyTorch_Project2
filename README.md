@@ -4,7 +4,7 @@
 
 - This project is a multi-class classification project, where you have to classify each image into any one of the 13 Kenyan food classes.
 
-<img src="https://github.com/RadimKozl/OpenCV_PyTorch_Project2/blob/main/img/header.png" alt="Food image" style="height: 100px; width:100px;"/>
+<img src="https://github.com/RadimKozl/OpenCV_PyTorch_Project2/blob/main/img/header.png" alt="Food image" style="height: 300px; width:500px;"/>
 
 <br><br>
 
